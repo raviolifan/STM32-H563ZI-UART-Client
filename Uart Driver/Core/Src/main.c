@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "led.h"
 #include "uart.h"
 #include "cli.h"
 
@@ -99,10 +100,11 @@ int main(void)
   MX_ICACHE_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  ledInit(APP_LED_GREEN);
+  ledInit(APP_LED_YELLOW);
+  ledInit(APP_LED_RED);
+  uartInit();
   cliInit();
-
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,7 +112,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	    cliUpdate();
+	  cliUpdate();
+	  ledTask();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -252,12 +255,46 @@ static void MX_USART3_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* USER CODE BEGIN MX_GPIO_Init_1 */
 
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(APP_LED_YELLOW_GPIO_Port, APP_LED_YELLOW_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(APP_LED_GREEN_GPIO_Port, APP_LED_GREEN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(APP_LED_RED_GPIO_Port, APP_LED_RED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : APP_LED_YELLOW_Pin */
+  GPIO_InitStruct.Pin = APP_LED_YELLOW_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(APP_LED_YELLOW_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : APP_LED_GREEN_Pin */
+  GPIO_InitStruct.Pin = APP_LED_GREEN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(APP_LED_GREEN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : APP_LED_RED_Pin */
+  GPIO_InitStruct.Pin = APP_LED_RED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(APP_LED_RED_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

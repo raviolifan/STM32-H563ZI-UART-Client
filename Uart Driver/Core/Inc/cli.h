@@ -21,7 +21,7 @@
  ******************************************************************************/
 
 /* Function pointer type for a CLI command handler. */
-typedef void (*CliCommandFunction)(void);
+typedef void (*CliCommandFunction)(int argc, char *argv[]);
 
 /*
  * CLI command descriptor.
