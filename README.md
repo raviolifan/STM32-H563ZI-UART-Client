@@ -1,25 +1,29 @@
-# STM32 NUCLEO-H563ZI UART Driver & Command Line Interface
+# STM32 NUCLEO-H563ZI UART Driver, LED Driver & Command Line Interface
 
 ## Overview
 
-This project implements a reusable UART driver and text-based Command Line Interface (CLI) for the **STM32 NUCLEO-H563ZI** using the STM32 HAL libraries.
+This project implements a modular firmware framework for the **STM32 NUCLEO-H563ZI** using the STM32 HAL libraries.
 
-Rather than simply transmitting text over UART, this project demonstrates how to build a modular firmware architecture by separating the application, CLI, UART driver, and hardware layers.
+The project includes a reusable UART driver, software LED driver, and a text-based Command Line Interface (CLI) that allows users to control on-board peripherals through a serial console.
 
-The resulting software provides a serial console that accepts user commands and executes the corresponding command handlers.
+The firmware is organized into independent layers that separate the application logic from hardware-specific implementation details, making the code easy to extend with additional peripherals such as Ethernet, CAN, sensors, or FreeRTOS tasks.
 
 ---
 
 ## Features
 
-* UART driver abstraction
-* Interrupt-driven UART reception
-* Ring buffer for asynchronous receive
-* Line-based command parser
-* Table-driven command dispatcher
-* Modular firmware architecture
-* Easily expandable command set
-
+- UART driver abstraction
+- LED driver abstraction
+- Interrupt-driven UART reception
+- Ring buffer for asynchronous receive
+- Line-based command parser
+- Token-based command parsing (`argc` / `argv`)
+- Table-driven command dispatcher
+- Lookup-table command decoding
+- Software-controlled LED blinking
+- Modular layered firmware architecture
+- Easily expandable command set
+- 
 ---
 
 ## Hardware
@@ -53,20 +57,43 @@ USART3 Pin Mapping:
                      ▼
           Command Line Interface
                      │
+         ┌───────────┴───────────┐
+         ▼                       ▼
+     UART Driver             LED Driver
+         │                       │
+         └───────────┬───────────┘
                      ▼
-              UART Driver API
+               STM32 HAL Library
                      │
                      ▼
-             STM32 HAL Library
-                     │
-                     ▼
-            USART3 Peripheral
-                     │
-                     ▼
-               ST-LINK USB VCP
+               STM32 Hardware
 
 ---
+## LED Driver
 
+The LED driver abstracts the hardware-specific GPIO configuration used to control the on-board LEDs.
+
+The driver maintains independent runtime state for each LED, allowing software-controlled blinking without exposing GPIO details to the application.
+
+### Public API
+
+```c
+bool ledInit(Led_t led);
+
+bool ledOn(Led_t led);
+
+bool ledOff(Led_t led);
+
+bool ledToggle(Led_t led);
+
+bool ledStatus(Led_t led);
+
+bool ledStartBlink(Led_t led, uint32_t interval);
+
+bool ledStopBlink(Led_t led);
+
+void ledTask(void);
+---
 ## UART Driver
 
 The UART driver provides a simple interface to the application while hiding all hardware-specific implementation details.
@@ -129,6 +156,7 @@ CLI
 
 Incoming bytes are placed into a circular buffer inside the interrupt service routine, allowing the application to process data independently of the hardware.
 
+The CLI tokenizes each command line into command arguments (`argc`/`argv`), searches a command table for the requested command, and dispatches execution through function pointers.
 ---
 
 ## Command Line Interface
@@ -148,6 +176,18 @@ uartReadLine()
 
       ▼
 
+Tokenizer
+
+      │
+
+      ▼
+
+argc / argv
+
+      │
+
+      ▼
+
 Command Table
 
       │
@@ -155,6 +195,12 @@ Command Table
       ▼
 
 Command Handler
+
+      │
+
+      ▼
+
+LED Driver
 ```
 
 Current commands include:
@@ -164,9 +210,10 @@ Current commands include:
 | help    | Display available commands |
 | version | Display firmware version   |
 | status  | Display system status      |
-| led on  | Turn LED on                |
-| led off | Turn LED off               |
-
+| led on green	|  Turn on green LED        |
+| led off red	|  Turn off red LED          |
+| led toggle yellow	|  Toggle yellow LED  |
+| led blink green	|  Blink green LED      |
 ---
 
 ## Command Table
@@ -208,31 +255,56 @@ Tail = Next read position
 
 This allows the interrupt routine to receive bytes while the application processes previously received data.
 
+--
+## Command Parser
+
+The CLI converts each command line into individual tokens using `strtok()`. Commands receive their arguments using the familiar `argc` / `argv` convention.
+
+For example:
+```text
+led blink green 500
+
+
+becomes
+
+
+argv[0] = "led"
+argv[1] = "blink"
+argv[2] = "green"
+argv[3] = "500"
+```
+
+This architecture makes it straightforward to extend the CLI without modifying the parser.
 ---
 
 ## Concepts Demonstrated
 
-* STM32 HAL
-* UART peripheral configuration
-* Interrupts
-* Callback functions
-* Circular buffers
-* Driver abstraction
-* Function pointers
-* Command dispatch tables
-* Modular firmware design
+- STM32 HAL
+- GPIO drivers
+- UART drivers
+- Interrupt-driven communication
+- Ring buffers
+- Command-line interfaces
+- Tokenization (`strtok`)
+- Driver abstraction
+- Runtime state management
+- Lookup tables
+- Function pointers
+- Command dispatch
+- Layered firmware architecture
 
 ---
 
 ## Future Improvements
 
-* Command arguments
-* Command history
-* Auto-completion
-* ANSI terminal colors
-* FreeRTOS integration
-* Ethernet CLI
-* Configuration storage in Flash
+- Numeric argument parsing (blink intervals)
+- Command history
+- Tab auto-completion
+- ANSI terminal formatting
+- Configuration storage in Flash
+- FreeRTOS integration
+- Ethernet networking with LwIP
+- TCP/IP command interface
 
 ---
 
