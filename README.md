@@ -23,7 +23,7 @@ The firmware is organized into independent layers that separate the application 
 - Software-controlled LED blinking
 - Modular layered firmware architecture
 - Easily expandable command set
-- 
+
 ---
 
 ## Hardware
@@ -37,7 +37,9 @@ USART3 Pin Mapping:
 | ------ | --- |
 | TX     | PD8 |
 | RX     | PD9 |
-
+|Green LED | PB0 |
+|Yellow LED | PF4 |
+| Red LED | PG4   |
 ---
 
 ## Software
@@ -67,8 +69,9 @@ USART3 Pin Mapping:
                      │
                      ▼
                STM32 Hardware
-
+```
 ---
+
 ## LED Driver
 
 The LED driver abstracts the hardware-specific GPIO configuration used to control the on-board LEDs.
@@ -121,37 +124,37 @@ bool uartReadLine(char *buffer, uint16_t maxLength);
 UART reception is interrupt driven.
 
 ```text
-Keyboard
+        Keyboard
 
-        │
+            │
 
-        ▼
+            ▼
 
-USART3 Hardware
+    USART3 Hardware
 
-        │
+            │
 
-        ▼
+            ▼
 
-USART3 Interrupt
+    USART3 Interrupt
 
-        │
+            │
 
-        ▼
+            ▼
 
 HAL_UART_RxCpltCallback()
 
-        │
+            │
 
-        ▼
+            ▼
 
-Ring Buffer
+      Ring Buffer
 
-        │
+            │
 
-        ▼
+            ▼
 
-CLI
+           CLI
 ```
 
 Incoming bytes are placed into a circular buffer inside the interrupt service routine, allowing the application to process data independently of the hardware.
@@ -255,7 +258,7 @@ Tail = Next read position
 
 This allows the interrupt routine to receive bytes while the application processes previously received data.
 
---
+
 ## Command Parser
 
 The CLI converts each command line into individual tokens using `strtok()`. Commands receive their arguments using the familiar `argc` / `argv` convention.
