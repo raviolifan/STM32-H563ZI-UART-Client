@@ -96,7 +96,10 @@ bool ledStartBlink(Led_t led, uint32_t interval);
 bool ledStopBlink(Led_t led);
 
 void ledTask(void);
+```
+
 ---
+
 ## UART Driver
 
 The UART driver provides a simple interface to the application while hiding all hardware-specific implementation details.
@@ -167,43 +170,43 @@ The CLI tokenizes each command line into command arguments (`argc`/`argv`), sear
 The CLI receives complete lines from the UART driver and compares them against a command table.
 
 ```text
-UART Driver
+       UART Driver
 
-      │
+            │
 
-      ▼
+            ▼
 
-uartReadLine()
+      uartReadLine()
 
-      │
+            │
 
-      ▼
+            ▼
 
-Tokenizer
+        Tokenizer
 
-      │
+            │
 
-      ▼
+            ▼
 
-argc / argv
+       argc / argv
 
-      │
+            │
 
-      ▼
+            ▼
 
-Command Table
+      Command Table
 
-      │
+            │
 
-      ▼
+            ▼
 
-Command Handler
+      Command Handler
 
-      │
+            │
 
-      ▼
+            ▼
 
-LED Driver
+        LED Driver
 ```
 
 Current commands include:
@@ -241,7 +244,7 @@ Adding new commands only requires implementing a handler and adding another entr
 The UART driver uses a circular buffer for asynchronous reception.
 
 ```text
-Interrupt
+ Interrupt
 
      │
 
@@ -266,11 +269,11 @@ The CLI converts each command line into individual tokens using `strtok()`. Comm
 For example:
 ```text
 led blink green 500
-
+```
 
 becomes
 
-
+```
 argv[0] = "led"
 argv[1] = "blink"
 argv[2] = "green"
